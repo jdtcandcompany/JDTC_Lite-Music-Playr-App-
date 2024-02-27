@@ -1,0 +1,90 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    compileSdkVersion 33
+
+    defaultConfig {
+        applicationId "com.jtcstudios.musicplayer"
+        minSdkVersion 29
+        targetSdkVersion 33
+        versionCode 2
+        versionName "2.0.0"
+        setProperty("archivesBaseName", "music-player")
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    flavorDimensions "variants"
+    productFlavors {
+        core {}
+        fdroid {}
+        prepaid {}
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled = true
+    }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+    namespace 'com.simplemobiletools.musicplayer'
+}
+
+dependencies {
+    implementation 'com.github.JTCJTCC:JT-Framework:225b8254fe'
+    implementation 'org.greenrobot:eventbus:3.3.1'
+    implementation 'androidx.media:media:1.6.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.airbnb.android:lottie:3.6.1'
+    implementation 'com.github.bjoernpetersen:m3u-parser:1.3.0'
+    implementation 'me.grantland:autofittextview:0.2.1'
+    coreLibraryDesugaring('com.android.tools:desugar_jdk_libs:2.0.2')
+
+
+    implementation "net.jthink:jaudiotagger:2.2.5"
+    kapt "androidx.room:room-compiler:2.5.0"
+    implementation "androidx.room:room-runtime:2.5.0"
+    annotationProcessor "androidx.room:room-compiler:2.5.0"
+}
